@@ -112,12 +112,12 @@ function updateEstSize() {
     state.helperOk = true;
     state.ffmpeg = !!ping.ffmpeg;
     setDot(true);
-    const mode = ping.native ? 'Native Host' : 'Port 8765';
-    setStatus(`helper active (${mode}) · yt-dlp ${ping.version || 'ok'}`);
+    const mode = ping.native ? 'Native Messaging' : 'local compatibility server';
+    setStatus(`youDl connected (${mode}) · yt-dlp ${ping.version || 'ok'}`);
     show($('ffmpeg-warn'), !state.ffmpeg);
   } catch (e) {
     setDot(false);
-    setStatus('Helper offline. Run install.sh once, or start server.', { error: true });
+    setStatus('Native host unavailable. Run the native-host installer, then reload youDl.', { error: true });
     return;
   }
 

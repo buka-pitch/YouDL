@@ -1,88 +1,54 @@
 # youDl
 
-A **local, no-cloud YouTube downloader**: a small browser extension (Chrome, Edge, Brave, Firefox) that drives **yt-dlp running on your own machine** through a tiny localhost helper API. No third-party services, no scraping sites — your browser talks to your own server, which talks to YouTube using the open-source `yt-dlp` extractor.
+youDl is a personal-use browser extension that runs `yt-dlp` on your computer. The extension connects to a local **Native Messaging Host** that the browser launches when needed. Downloads stay on your machine; there is no hosted service, account, or open localhost port.
 
 ```
-┌──────────────┐     fetch      ┌─────────────────┐    spawn     ┌────────┐
-│  extension   │ ─────────────▶ │  youDl helper   │ ───────────▶ │ yt-dlp │
-│  (MV3 popup) │◀─── progress ──│  Node + Express │              │        │
-└──────────────┘                └─────────────────┘              └────────┘
-   your browser                    127.0.0.1:8765                your disk
+Browser extension ⇄ Native Messaging ⇄ Local youDl host → yt-dlp → your files
 ```
 
-### IDM-style hover overlay
+## Install
 
-On any YouTube watch or Shorts page, hovering the video player shows a **⬇ youDl** pill in the top-right of the player. Click it to get an inline quality menu (Best / 1080p / 720p / 480p / 360p / Audio only); picking one starts the download and the pill becomes a live progress meter until the button reads **saved ✓**. The overlay talks to the helper through the extension's background worker (page CSP blocks direct localhost fetches).
+### Requirements
 
-## Quick Install (Native Messaging — No Server to Run!)
+- Node.js 18 or newer
+- `yt-dlp` available on your PATH
+- `ffmpeg` available on your PATH for merging separate audio/video streams and conversion. The installer checks for it and warns if it is missing; it does not install ffmpeg.
 
-youDl uses browser **Native Messaging**: your browser directly launches the helper behind the scenes when you download, with zero open ports and zero terminal commands required while browsing.
+### Register the native host
 
-### 1. Register Native Helper (Run Once)
-Prerequisites: **Node 18+**, **yt-dlp** on PATH (`pip install yt-dlp`), and **ffmpeg** (`sudo apt install ffmpeg`).
+Run the installer once from the project root. It registers the host with Chrome, Brave, Edge, and Firefox on the current computer.
 
-* **Linux / macOS**:
-  ```bash
-  ./native-host/install.sh
-  ```
-* **Windows**:
-  Double-click `native-host\install.bat`
+- **Linux / macOS:** `./native-host/install.sh`
+- **Windows:** double-click `native-host\\install.bat`
 
-This registers the native host for **Google Chrome**, **Brave Browser**, **Microsoft Edge**, and **Mozilla Firefox**.
+The native host starts automatically when you use the extension; you do not need to keep a server or terminal running.
 
-### 2. Extension
-* **Chrome / Brave / Edge** — Open `chrome://extensions` (or `brave://extensions`, `edge://extensions`) → enable Developer mode → **Load unpacked** → select the `extension/` folder.
-* **Firefox** — Open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on** → select `extension/manifest.firefox.json`.
+### Load the extension
 
-*(Optional: If you prefer running an HTTP server manually instead of native messaging, you can still run `cd server && npm start` to listen on `http://127.0.0.1:8765`).*
+- **Chrome / Edge / Brave:** open the browser's extensions page, enable Developer mode, choose **Load unpacked**, and select `extension/`.
+- **Firefox:** open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**, and select `extension/manifest.firefox.json`. Temporary add-ons must be loaded again after Firefox restarts.
 
-### 2. Extension
-
-**Chrome / Edge / Brave** — `brave://extensions` (or `chrome://extensions`, `edge://extensions`) → Developer mode → **Load unpacked** → select the `extension/` folder.
-
-**Firefox** — `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on** → pick `extension/manifest.firefox.json`.
-
-> This extension is not publishable to the Chrome Web Store or AMO — marketplace policy prohibits YouTube-content downloaders. It is a personal, developer-mode tool, like yt-dlp itself.
+Reload the extension after registering the host. If using an unpacked Chromium extension with a different extension ID, pass that ID to `install.sh` (or `install.bat`) so the host allows it.
 
 ## Use it
 
-- Open a YouTube **watch** or **shorts** page → the toolbar icon shows a badge; hit the popup and the open video is pre-filled.
-- Or paste any URL into the popup and press **Fetch**.
-- Pick quality (**Best / 1080p / 720p / 480p / 360p / Audio only**) → **Download**.
-- Watch progress; the finished file path appears when done. Cancel anytime while downloading.
+- On YouTube watch, Shorts, and supported thumbnail pages, use the youDl download control.
+- Or paste a video URL into the extension popup.
+- Choose a quality and format, then download. Progress and cancellation are available in the popup.
 
-## API (helper)
+Other site support depends on `yt-dlp` and each site's availability. Only save videos you have permission to download.
 
-| Method | Endpoint             | Purpose                                  |
-|--------|----------------------|------------------------------------------|
-| GET    | `/ping`              | health check + version info + session token |
-| POST   | `/resolve`           | metadata + format list for a URL         |
-| GET    | `/jobs`              | job history (memory-only, lost on restart) |
-| POST   | `/jobs`              | start a download `{url, preset?, output?}` |
-| GET    | `/jobs/:id`          | job status + progress                    |
-| POST   | `/jobs/:id/cancel`   | cancel a queued/running job              |
+## How the connection works
 
-All mutating endpoints require header `x-youdl-token: <token from /ping>`.
+The browser launches `native-host/host.js` through Native Messaging. The host uses the local modules in `server/src/` to run `yt-dlp` and report progress over the browser's private standard-input/output channel. It does not expose an HTTP listener or require a server process to be started manually. Download jobs and history are held in memory and are cleared when the host exits.
 
 ## Project layout
 
 ```
-server/                Node + Express wrapper around yt-dlp
-  src/index.js         HTTP API, token gate, 127.0.0.1 bind
-  src/yt.js            yt-dlp spawn, progress parsing, preset mapping
-  src/jobs.js          in-memory job store, queue, cancel
-extension/
-  manifest.json        Chrome/Edge/Brave (MV3 service worker)
-  manifest.firefox.json Firefox variant (background scripts)
-  background.js        badge + tab video state + localhost API proxy
-  content/sniffer.js   detects /watch and /shorts URLs on YouTube tabs
-  content/overlay.js   IDM-style hover "⬇ youDl" pill + inline quality panel
-  popup/               paste UI, quality picker, progress bar
+extension/             Browser extension (Chromium and Firefox manifests)
+native-host/           Native Messaging host and per-platform installers
+server/src/            Shared yt-dlp runner and in-memory job manager
+scrollcraft/builds/    Landing page and downloadable personal-use bundle
 ```
 
-## Design note & limits
-
-- Nothing is uploaded or stored remotely; the helper is a thin process manager.
-- Job history is in-memory: restart the helper, your history is clean.
-- Downloads follow YouTube's availability: private/DRM/age-restricted videos fail unless yt-dlp can access them legitimately on your machine (cookies via `YOUDL_*` extension point later).
-- Use for content you're permitted to save. You are responsible for that call, exactly as when running yt-dlp directly.
+The extension is distributed as an unpacked personal-use tool, not through the Chrome Web Store or Firefox Add-ons marketplace.

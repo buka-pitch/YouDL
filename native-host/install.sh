@@ -29,6 +29,15 @@ else
   echo "   Downloads will require yt-dlp. Install via: pip install yt-dlp"
 fi
 
+# Check ffmpeg. It is only required for downloads that need merging or conversion.
+if command -v ffmpeg >/dev/null 2>&1; then
+  echo "✓ ffmpeg detected: $(ffmpeg -version 2>/dev/null | head -n 1)"
+else
+  echo "⚠️ ffmpeg was not found on your PATH."
+  echo "   Downloads needing separate audio/video streams or conversion may fail."
+  echo "   Install ffmpeg and restart your browser, or choose a single-file format."
+fi
+
 # Determine allowed origins
 ORIGINS="\"chrome-extension://$DEFAULT_EXT_ID/\""
 if [ -n "$EXTRA_EXT_ID" ] && [ "$EXTRA_EXT_ID" != "$DEFAULT_EXT_ID" ]; then
