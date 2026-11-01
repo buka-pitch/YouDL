@@ -101,6 +101,12 @@ async function triggerBrowserDownload(j, data) {
   j.browserDownloaded = true;
   saveRegistry();
 
+  // When running via native host, the file is saved directly to disk (e.g. ~/Downloads/youDl/)
+  if (nativePort) {
+    console.info('[youDl] Native download completed on disk:', data.filepath);
+    return;
+  }
+
   if (!api.downloads || !api.downloads.download) return;
   const url = `${API_BASE}/jobs/${j.jobId}/file`;
   let filename = undefined;
@@ -138,6 +144,101 @@ try {
 
 /* ── helper proxy ────────────────────────────────────────────────────── */
 
+/* ── Native Messaging Host bridge (Chrome, Brave, Edge, Firefox) ──────── */
+
+const NATIVE_HOST = 'com.youdl.helper';
+let nativePort = null;
+let nativePending = new Map();
+let nextMsgId = 1;
+let nativeDisabled = false;
+
+function ensureNativePort() {
+  if (nativePort) return nativePort;
+  if (nativeDisabled) return null;
+  if (!api.runtime || !api.runtime.connectNative) return null;
+
+  try {
+    const port = api.runtime.connectNative(NATIVE_HOST);
+    nativePort = port;
+
+    port.onMessage.addListener((msg) => {
+      if (!msg) return;
+
+      // Realtime push update from native host
+      if (msg.event === 'jobsUpdate' && Array.isArray(msg.jobs)) {
+        let changed = false;
+        for (const j of msg.jobs) {
+          if (!j || !j.jobId) continue;
+          if (registry[j.jobId]) {
+            registry[j.jobId].snapshot = j;
+            if (['done', 'error', 'canceled'].includes(j.status)) {
+              if (!registry[j.jobId].terminalSince) {
+                registry[j.jobId].terminalSince = Date.now();
+              }
+            }
+            changed = true;
+          }
+        }
+        if (changed) saveRegistry();
+        return;
+      }
+
+      if (msg.id && nativePending.has(msg.id)) {
+        const { resolve, timer } = nativePending.get(msg.id);
+        clearTimeout(timer);
+        nativePending.delete(msg.id);
+        resolve(msg);
+      }
+    });
+
+    port.onDisconnect.addListener(() => {
+      const err = api.runtime.lastError ? api.runtime.lastError.message : 'disconnected';
+      console.warn('[youDl] Native host disconnected:', err);
+      nativePort = null;
+      for (const [id, req] of nativePending) {
+        clearTimeout(req.timer);
+        req.reject(new Error(err));
+      }
+      nativePending.clear();
+      // If host not found on system, temporarily back off
+      if (/not found|cannot find/i.test(err)) {
+        nativeDisabled = true;
+        setTimeout(() => { nativeDisabled = false; }, 8000);
+      }
+    });
+
+    return nativePort;
+  } catch (e) {
+    console.warn('[youDl] Native host init exception:', e);
+    nativePort = null;
+    return null;
+  }
+}
+
+function sendNative(req, timeoutMs = 25000) {
+  const port = ensureNativePort();
+  if (!port) return Promise.reject(new Error('Native host not connected'));
+
+  return new Promise((resolve, reject) => {
+    const id = nextMsgId++;
+    const timer = setTimeout(() => {
+      nativePending.delete(id);
+      reject(new Error(`Native request timed out: ${req.path || req.action}`));
+    }, timeoutMs);
+
+    nativePending.set(id, { resolve, reject, timer });
+    try {
+      port.postMessage({ id, ...req });
+    } catch (e) {
+      clearTimeout(timer);
+      nativePending.delete(id);
+      reject(e);
+    }
+  });
+}
+
+/* ── HTTP helper fallback proxy ───────────────────────────────────────── */
+
 let cachedToken = null;
 
 async function helperToken(force = false) {
@@ -149,7 +250,7 @@ async function helperToken(force = false) {
   return cachedToken;
 }
 
-async function helperFetch(path, { method = 'GET', body = null, retryAuth = true } = {}) {
+async function httpHelperFetch(path, { method = 'GET', body = null, retryAuth = true } = {}) {
   const token = await helperToken();
   const res = await fetch(API_BASE + path, {
     method,
@@ -157,8 +258,8 @@ async function helperFetch(path, { method = 'GET', body = null, retryAuth = true
     body: body ? JSON.stringify(body) : undefined,
   });
   if (res.status === 403 && retryAuth) {
-    cachedToken = null;           // helper restarted since we cached it
-    return helperFetch(path, { method, body, retryAuth: false });
+    cachedToken = null;
+    return httpHelperFetch(path, { method, body, retryAuth: false });
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -167,6 +268,30 @@ async function helperFetch(path, { method = 'GET', body = null, retryAuth = true
     throw err;
   }
   return data;
+}
+
+async function helperFetch(path, { method = 'GET', body = null, retryAuth = true } = {}) {
+  // 1. Try Native Messaging Host first!
+  if (!nativeDisabled && api.runtime && api.runtime.connectNative) {
+    try {
+      const resp = await sendNative({ path, method, body });
+      if (resp && resp.ok) {
+        return resp.data;
+      }
+      if (resp && resp.error) {
+        throw new Error(resp.error);
+      }
+    } catch (e) {
+      const msg = String(e.message || e);
+      // Fall through to HTTP only if native connection wasn't established
+      if (!/not found|disconnected|not connected|cannot find/i.test(msg)) {
+        throw e;
+      }
+    }
+  }
+
+  // 2. HTTP Fallback
+  return httpHelperFetch(path, { method, body, retryAuth });
 }
 
 /* ── messaging ───────────────────────────────────────────────────────── */

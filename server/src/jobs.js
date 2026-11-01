@@ -23,7 +23,7 @@ let nextId = Math.floor(Date.now() / 1000);
 function outputDir(requested) {
   const dir = requested ||
     process.env.YOUDL_OUTPUT ||
-    path.join(os.tmpdir(), 'youDl');
+    path.join(os.homedir(), 'Downloads', 'youDl');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }

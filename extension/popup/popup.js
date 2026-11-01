@@ -106,17 +106,18 @@ function updateEstSize() {
 
 (async function init() {
   try {
-    const ping = await fetch(API + '/ping').then((r) => r.json());
+    const ping = await bgApi('/ping');
     if (!ping.ok) throw new Error(ping.error || 'helper not ready');
-    state.token = ping.token;
+    state.token = ping.token || null;
     state.helperOk = true;
     state.ffmpeg = !!ping.ffmpeg;
     setDot(true);
-    setStatus(`helper ready · yt-dlp ${ping.version} · ffmpeg ${ping.ffmpeg ? 'found' : 'missing'}`);
+    const mode = ping.native ? 'Native Host' : 'Port 8765';
+    setStatus(`helper active (${mode}) · yt-dlp ${ping.version || 'ok'}`);
     show($('ffmpeg-warn'), !state.ffmpeg);
   } catch (e) {
     setDot(false);
-    setStatus('Helper is not running. Start it:  cd server && npm start', { error: true });
+    setStatus('Helper offline. Run install.sh once, or start server.', { error: true });
     return;
   }
 
