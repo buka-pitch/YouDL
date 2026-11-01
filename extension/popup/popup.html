@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>youDl</title>
+  <link rel="stylesheet" href="popup.css"/>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Column: Downloader & Active Video -->
+    <aside class="sidebar-left">
+      <header class="head">
+        <img src="../icons/icon48.png" alt="" width="20" height="20"/>
+        <h1>youDl</h1>
+        <button id="btn-scan-tab" class="btn-scan-tab" type="button" title="Inject/Rescan download buttons on active YouTube tab">Scan Page</button>
+        <span id="srv-dot" class="dot" title="helper status"></span>
+      </header>
+
+      <div id="status-line" class="status-line muted">
+        <span id="status-spinner" class="spinner hidden"></span>
+        <span id="status-text">checking helper…</span>
+      </div>
+
+      <section id="detected" class="detected hidden">
+        <div class="detected-label">Detected on this tab</div>
+        <div id="detected-url" class="detected-url"></div>
+      </section>
+
+      <form id="paste-form">
+        <div class="row">
+          <input id="url" type="text" spellcheck="false" autocomplete="off"
+                 placeholder="Paste a video URL…"/>
+          <button id="go" type="submit" class="primary">Fetch</button>
+        </div>
+      </form>
+
+      <section id="skeleton-card" class="skeleton-card hidden">
+        <div class="skeleton-thumb"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+        </div>
+      </section>
+
+      <section id="video-card" class="card hidden">
+        <img id="thumb" alt="" width="96" height="54"/>
+        <div class="card-text">
+          <div id="v-title" class="v-title"></div>
+          <div id="v-meta" class="v-meta muted"></div>
+          <div id="size-badge" class="size-badge">Est. Size: <b id="est-size-val">calculating…</b></div>
+        </div>
+        <div class="row quality-row">
+          <select id="quality" title="Resolution">
+            <option value="best">Best available</option>
+            <option value="1080">1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
+            <option value="audio">Audio only</option>
+          </select>
+          <select id="format" title="Container / Format">
+            <option value="mp4" selected>MP4</option>
+            <option value="webm">WebM</option>
+            <option value="mp3">MP3</option>
+          </select>
+          <button id="dl" type="button" class="primary">Download</button>
+        </div>
+        <label class="saveas-row">
+          <input type="checkbox" id="saveas-check" checked/>
+          <span>Prompt where to save file when done</span>
+        </label>
+        <div id="ffmpeg-warn" class="warn hidden">ffmpeg not found — merges will fail. Install it or pick a single-file format.</div>
+      </section>
+
+      <section id="job" class="job hidden">
+        <div class="job-head">
+          <span id="job-status" class="muted">…</span>
+          <button id="cancel" type="button" class="ghost">Cancel</button>
+        </div>
+        <div class="bar"><div id="bar-fill"></div></div>
+        <div id="job-submeta" class="job-submeta muted">
+          <span id="job-speed"></span>
+          <span id="job-eta"></span>
+        </div>
+        <div id="file-path" class="file muted"></div>
+      </section>
+
+      <footer class="footer muted">
+        Runs through your local yt-dlp helper.
+      </footer>
+    </aside>
+
+    <!-- Right Column: Queue & History Panel -->
+    <main class="panel-right">
+      <div class="panel-header">
+        <div class="tab-group">
+          <button id="tab-queue" class="tab-btn active" type="button">
+            Queue <span id="badge-queue" class="tab-badge">0</span>
+          </button>
+          <button id="tab-history" class="tab-btn" type="button">
+            History <span id="badge-history" class="tab-badge">0</span>
+          </button>
+        </div>
+        <button id="clear-history" class="ghost-clear" type="button" title="Clear completed history">Clear</button>
+      </div>
+
+      <div id="view-queue" class="panel-view">
+        <div id="queue-empty" class="empty-state">
+          <div class="empty-icon">⬇</div>
+          <div>No downloads in progress</div>
+        </div>
+        <div id="queue-list" class="task-list"></div>
+      </div>
+
+      <div id="view-history" class="panel-view hidden">
+        <div id="history-empty" class="empty-state">
+          <div class="empty-icon">✓</div>
+          <div>No download history yet</div>
+        </div>
+        <div id="history-list" class="task-list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

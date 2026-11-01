@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" role="img" aria-labelledby="title desc">
+  <title id="title">youDl local download progress preview</title><desc id="desc">Illustrative preview of the download queue with a progress bar and cancel button.</desc>
+  <rect width="1080" height="760" fill="#11161b"/>
+  <rect x="78" y="56" width="924" height="648" rx="20" fill="#171d23" stroke="#3b4651"/>
+  <rect x="79" y="57" width="922" height="72" rx="20" fill="#101418"/>
+  <path d="M112 88l14-15 14 15v17h-28z" fill="none" stroke="#72aaff" stroke-width="3"/><text x="158" y="99" fill="#e6edf3" font-family="Arial,sans-serif" font-weight="700" font-size="23">youDl</text>
+  <circle cx="932" cy="92" r="6" fill="#63c58a"/><text x="951" y="97" fill="#8d9ba7" font-family="monospace" font-size="12">LOCAL HELPER CONNECTED</text>
+  <text x="120" y="183" fill="#72aaff" font-family="monospace" font-size="12" letter-spacing="2">DOWNLOAD QUEUE</text>
+  <rect x="120" y="218" width="840" height="194" rx="12" fill="#1c242c" stroke="#303b46"/>
+  <rect x="147" y="246" width="154" height="101" rx="7" fill="#364656"/><path d="M211 277l35 20-35 20z" fill="#dce6ef"/>
+  <text x="330" y="260" fill="#e7edf3" font-family="Arial,sans-serif" font-weight="700" font-size="19">Video saved to your computer</text>
+  <text x="330" y="291" fill="#8f9eaa" font-family="Arial,sans-serif" font-size="14">MP4 · 1080p · 247 MB</text>
+  <text x="330" y="335" fill="#bac7d2" font-family="monospace" font-size="13">Downloading · 68%</text>
+  <text x="886" y="335" fill="#72aaff" font-family="monospace" font-size="13">00:18</text>
+  <rect x="330" y="354" width="573" height="5" rx="2.5" fill="#34414c"/><rect x="330" y="354" width="390" height="5" rx="2.5" fill="#72aaff"/>
+  <text x="330" y="386" fill="#84929e" font-family="monospace" font-size="11">14.2 MB/s</text>
+  <rect x="120" y="454" width="840" height="92" rx="10" fill="#13191f" stroke="#303b46"/>
+  <text x="151" y="493" fill="#d6dfe6" font-family="Arial,sans-serif" font-size="15">The finished file goes to your chosen folder.</text>
+  <text x="151" y="519" fill="#86939f" font-family="Arial,sans-serif" font-size="13">The helper processes it locally. You can cancel while it runs.</text>
+  <rect x="830" y="480" width="100" height="38" rx="6" fill="none" stroke="#53616e"/><text x="855" y="504" fill="#c2cbd3" font-family="Arial,sans-serif" font-size="13">Cancel</text>
+  <text x="120" y="642" fill="#6f7c87" font-family="monospace" font-size="12">Illustrative interface preview</text>
+</svg>

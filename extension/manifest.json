@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "youDl",
+  "version": "0.1.0",
+  "description": "Local, no-cloud YouTube downloader for your own use. Talks to a yt-dlp helper running on your machine.",
+  "permissions": ["activeTab", "tabs", "storage", "downloads", "alarms", "scripting"],
+  "host_permissions": ["http://127.0.0.1:8765/*"],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*", "https://music.youtube.com/*"],
+      "js": ["content/sniffer.js", "content/overlay.js", "content/thumbs.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
