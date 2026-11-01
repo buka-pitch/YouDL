@@ -13,12 +13,12 @@
         <img src="../icons/icon48.png" alt="" width="20" height="20"/>
         <h1>youDl</h1>
         <button id="btn-scan-tab" class="btn-scan-tab" type="button" title="Inject/Rescan download buttons on active YouTube tab">Scan Page</button>
-        <span id="srv-dot" class="dot" title="helper status"></span>
+        <span id="srv-dot" class="dot" title="native host status"></span>
       </header>
 
       <div id="status-line" class="status-line muted">
         <span id="status-spinner" class="spinner hidden"></span>
-        <span id="status-text">checking helper…</span>
+        <span id="status-text">checking native host…</span>
       </div>
 
       <section id="detected" class="detected hidden">
@@ -69,7 +69,7 @@
           <input type="checkbox" id="saveas-check" checked/>
           <span>Prompt where to save file when done</span>
         </label>
-        <div id="ffmpeg-warn" class="warn hidden">ffmpeg not found — merges will fail. Install it or pick a single-file format.</div>
+        <div id="ffmpeg-warn" class="warn hidden">ffmpeg not found. Downloads needing audio/video merging or conversion may fail. Install ffmpeg and restart your browser, or choose a single-file format.</div>
       </section>
 
       <section id="job" class="job hidden">
@@ -86,7 +86,7 @@
       </section>
 
       <footer class="footer muted">
-        Runs through your local yt-dlp helper.
+        Runs locally through the youDl Native Messaging Host.
       </footer>
     </aside>
 

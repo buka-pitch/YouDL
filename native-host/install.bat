@@ -13,6 +13,15 @@ if %ERRORLEVEL% neq 0 (
   exit /b 1
 )
 
+where ffmpeg >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+  echo [OK] ffmpeg detected.
+) else (
+  echo [!] ffmpeg was not found on your PATH.
+  echo     Downloads needing separate audio/video streams or conversion may fail.
+  echo     Install ffmpeg and restart your browser, or choose a single-file format.
+)
+
 set "HOST_NAME=com.youdl.helper"
 set "DIR=%~dp0"
 set "RUN_BAT=%DIR%run.bat"

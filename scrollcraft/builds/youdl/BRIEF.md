@@ -4,7 +4,7 @@
 
 User: “the exxtension is for downloading videos from youtube and other video sites but localy its personal not a third party service its for privacy”
 
-Evidence from the repository: youDl is a browser extension plus a small localhost helper that runs yt-dlp on the user's machine. The helper binds to 127.0.0.1. The extension supports Chrome, Edge, Brave, and Firefox in developer mode. The installed extension is not listed in the Chrome Web Store or AMO. YouTube pages have an in-player control; URLs can also be pasted into the popup. Other-site support depends on yt-dlp and the website.
+Evidence from the repository: youDl is a browser extension plus a Native Messaging Host that runs yt-dlp on the user's machine. The browser launches the host on demand over standard input/output; the normal connection opens no local network port and needs no manually started server. The extension supports Chrome, Edge, Brave, and Firefox in developer mode. The installed extension is not listed in the Chrome Web Store or AMO. YouTube pages have an in-player control; URLs can also be pasted into the popup. Other-site support depends on yt-dlp and the website.
 
 ## Creative brief
 
@@ -15,12 +15,12 @@ The user asked for “a stylish landing page” with “a space for downloading 
 3. **Energy:** quiet typographic opening; a clear, memorable local-route interaction; calm, useful product demos; direct installation close.
 4. **Feeling curve:**
    - Opening: curiosity, created by a sparse title page and a direct privacy promise.
-   - Local route: relief, created by the browser-to-local-helper-to-disk path lighting up while the cloud remains outside it.
+   - Local route: relief, created by the browser-to-native-host-to-disk path lighting up while the cloud remains outside it.
    - In use: clarity, created by the actual popup and in-player workflow.
    - Demo gallery: confidence, created by concrete controls and visible download states.
    - Install: resolve, created by a real bundle and concise setup instructions.
 5. **Peak:** “I watched the signal travel from my browser to my own computer, and it never went to a cloud.” Act: Local route.
-6. **Signature move:** a visitor-operated route trace with selectable Browser, This computer, and Your files stops. The connection animates locally and labels each hop; the crossed-out cloud never lights up.
+6. **Signature move:** a visitor-operated route trace with selectable Browser, This computer, and Your files stops. The connection animates locally through Native Messaging and labels each hop; the crossed-out cloud never lights up.
 7. **Aesthetic range:** authored decision: premium-minimal with a technical editorial character.
 8. **Structure:** authored decision: distinct editorial chapters, because the product needs short explanations and accurate setup details. A continuous world would make the practical details feel like scenery.
 9. **Existing assets:** `scrensht.png`, extension icons, existing popup HTML/CSS, repository README, and design tokens. No generated imagery.

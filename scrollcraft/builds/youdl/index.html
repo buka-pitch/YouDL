@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#101418">
-  <meta name="description" content="A personal video downloader that runs on your computer. youDl connects your browser to your own local yt-dlp helper.">
+  <meta name="description" content="A personal video downloader that runs on your computer. youDl connects your browser to yt-dlp through Native Messaging, without a local server or open port.">
   <title>youDl / keep the download local</title>
   <link rel="icon" href="assets/favicon.png" type="image/png">
   <link rel="stylesheet" href="scrollcraft.css">
@@ -31,17 +31,17 @@
       <div class="chapter-head"><span class="chapter-index">01 / THE ROUTE</span><span class="chapter-side-note">NO REMOTE DOWNLOAD SERVICE</span></div>
       <div class="route-intro">
         <h2 class="sc-display sc-display--lg" id="route-heading" data-sc-in>Nothing takes<br>the scenic route.</h2>
-        <p class="sc-body" data-sc-in>Your browser speaks to a tiny helper on <code>127.0.0.1</code>. That helper runs yt-dlp and saves the result to your computer. The file stays yours from start to finish.</p>
+        <p class="sc-body" data-sc-in>Your browser launches a small native helper on your computer through Native Messaging. It runs yt-dlp and saves the result locally, without opening a network port.</p>
       </div>
       <div class="route-map" aria-label="Interactive local download route">
         <div class="route-track" aria-hidden="true"><span class="route-wire"></span><span class="route-pulse"></span></div>
         <button class="route-node is-active" type="button" data-stop="browser" aria-pressed="true"><span class="node-icon browser-icon"><i></i><i></i><i></i></span><span class="node-name">Your browser</span><span class="node-detail">youDl extension</span></button>
-        <button class="route-node" type="button" data-stop="computer" aria-pressed="false"><span class="node-icon computer-icon"><i></i></span><span class="node-name">Your computer</span><span class="node-detail">local yt-dlp helper</span></button>
+        <button class="route-node" type="button" data-stop="computer" aria-pressed="false"><span class="node-icon computer-icon"><i></i></span><span class="node-name">Your computer</span><span class="node-detail">Native Messaging · yt-dlp</span></button>
         <button class="route-node" type="button" data-stop="files" aria-pressed="false"><span class="node-icon file-icon"><i></i></span><span class="node-name">Your files</span><span class="node-detail">your Downloads folder</span></button>
         <div class="route-cloud" aria-label="Cloud service not used"><span>cloud service</span><b aria-hidden="true"></b></div>
         <p class="route-caption" aria-live="polite">Start in your browser. Choose a video, then pick a format.</p>
       </div>
-      <div class="route-foot"><span>01 / Browser extension</span><span>02 / Local helper</span><span>03 / Your disk</span></div>
+      <div class="route-foot"><span>01 / Browser extension</span><span>02 / Native host</span><span>03 / Your disk</span></div>
     </section>
 
     <section class="chapter in-use-chapter" id="in-use" data-sc-act="flow" aria-labelledby="use-heading">
@@ -87,17 +87,17 @@
     <section class="chapter install-chapter" id="install" data-sc-act="flow" aria-labelledby="install-heading">
       <div class="chapter-head"><span class="chapter-index">04 / YOUR SETUP</span><span class="chapter-side-note">A PERSONAL TOOL, INSTALLED BY YOU</span></div>
       <div class="install-layout">
-        <div class="install-copy"><p class="eyebrow">NO MARKETPLACE ACCOUNT NEEDED</p><h2 class="sc-display sc-display--lg" id="install-heading" data-sc-in>Make it<br>your own.</h2><p class="sc-body" data-sc-in>Download the bundle, start the local helper, then load the extension in your browser's developer mode. The helper listens on your computer only.</p>
+        <div class="install-copy"><p class="eyebrow">NO MARKETPLACE ACCOUNT NEEDED</p><h2 class="sc-display sc-display--lg" id="install-heading" data-sc-in>Make it<br>your own.</h2><p class="sc-body" data-sc-in>Download the bundle, register the Native Messaging Host once, then load the extension in your browser's developer mode. The browser starts the helper when needed; there is no server to keep running.</p>
           <p class="download-line">Ready to set up your local copy? <a class="download-link" href="downloads/youDl-personal.zip" download>Download youDl <span aria-hidden="true">↗</span></a> <small>(ZIP, for personal use)</small></p>
           <p class="download-message" id="download-message" aria-live="polite">Includes the browser extension, helper, and setup guide.</p>
         </div>
         <div class="setup-steps" data-sc-in>
-          <div class="setup-step"><span>01</span><div><h3>Start the helper</h3><p>Install Node 18+, yt-dlp, and ffmpeg. In the extracted folder, run <code>npm install</code> then <code>npm start</code> in <code>server/</code>.</p></div></div>
-          <div class="setup-step"><span>02</span><div><h3>Load the extension</h3><p>Open your browser’s extensions page, enable Developer mode, and choose <em>Load unpacked</em> on the included <code>extension/</code> folder. Firefox uses <code>manifest.firefox.json</code>.</p></div></div>
+          <div class="setup-step"><span>01</span><div><h3>Register the native host</h3><p>Install Node 18+ and yt-dlp. Run <code>native-host/install.sh</code> (Windows: <code>install.bat</code>) once to register the browser connection; it checks for ffmpeg and warns if it is missing.</p></div></div>
+          <div class="setup-step"><span>02</span><div><h3>Load the extension</h3><p>Open your browser’s extensions page, enable Developer mode, and choose <em>Load unpacked</em> on the included <code>extension/</code> folder. Firefox uses <code>manifest.firefox.json</code>. The browser launches the helper automatically.</p></div></div>
           <div class="setup-step"><span>03</span><div><h3>Save to your computer</h3><p>Open a supported video page or paste its URL. Pick a quality and format, then save the file where you want it.</p></div></div>
         </div>
       </div>
-      <footer class="colophon"><a class="wordmark" href="#top"><span class="logo-glyph">↓</span> youDl</a><span>Personal tool. Local helper. Your files.</span><span>Use only for videos you have permission to save.</span></footer>
+      <footer class="colophon"><a class="wordmark" href="#top"><span class="logo-glyph">↓</span> youDl</a><span>Personal tool. Native host. Your files.</span><span>Use only for videos you have permission to save.</span></footer>
     </section>
   </main>
 
