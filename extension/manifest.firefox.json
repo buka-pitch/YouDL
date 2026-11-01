@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "youDl",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Local, no-cloud YouTube downloader for your own use. Talks to a yt-dlp helper running on your machine.",
   "permissions": ["activeTab", "tabs", "storage", "downloads", "alarms", "scripting", "nativeMessaging"],
   "host_permissions": ["http://127.0.0.1:8765/*", "http://127.0.0.1:8766/*"],
