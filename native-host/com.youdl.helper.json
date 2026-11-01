@@ -1,0 +1,9 @@
+{
+  "name": "com.youdl.helper",
+  "description": "youDl local download helper",
+  "path": "PLACEHOLDER_PATH",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://cfbkoncfgcphkmgapphbnmeooacnkfkc/"
+  ]
+}

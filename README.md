@@ -14,21 +14,27 @@ A **local, no-cloud YouTube downloader**: a small browser extension (Chrome, Edg
 
 On any YouTube watch or Shorts page, hovering the video player shows a **⬇ youDl** pill in the top-right of the player. Click it to get an inline quality menu (Best / 1080p / 720p / 480p / 360p / Audio only); picking one starts the download and the pill becomes a live progress meter until the button reads **saved ✓**. The overlay talks to the helper through the extension's background worker (page CSP blocks direct localhost fetches).
 
-## Install
+## Quick Install (Native Messaging — No Server to Run!)
 
-### 1. Helper (server)
+youDl uses browser **Native Messaging**: your browser directly launches the helper behind the scenes when you download, with zero open ports and zero terminal commands required while browsing.
 
-Prerequisites: **Node 18+**, **yt-dlp** on your PATH (`pip install yt-dlp`, or equivalent), and **ffmpeg** for merging separate video/audio streams (`sudo apt install ffmpeg`).
+### 1. Register Native Helper (Run Once)
+Prerequisites: **Node 18+**, **yt-dlp** on PATH (`pip install yt-dlp`), and **ffmpeg** (`sudo apt install ffmpeg`).
 
-```bash
-cd server
-npm install
-npm start
-# → youDl helper listening on http://127.0.0.1:8765
-# → session token printed in the log (the extension fetches it automatically)
-```
+* **Linux / macOS**:
+  ```bash
+  ./native-host/install.sh
+  ```
+* **Windows**:
+  Double-click `native-host\install.bat`
 
-The server binds to **127.0.0.1 only** and gates write endpoints behind a per-session token. Files land in `~/Downloads/youDl/` by default (`YOUDL_OUTPUT` env var or per-request `output` to change).
+This registers the native host for **Google Chrome**, **Brave Browser**, **Microsoft Edge**, and **Mozilla Firefox**.
+
+### 2. Extension
+* **Chrome / Brave / Edge** — Open `chrome://extensions` (or `brave://extensions`, `edge://extensions`) → enable Developer mode → **Load unpacked** → select the `extension/` folder.
+* **Firefox** — Open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on** → select `extension/manifest.firefox.json`.
+
+*(Optional: If you prefer running an HTTP server manually instead of native messaging, you can still run `cd server && npm start` to listen on `http://127.0.0.1:8765`).*
 
 ### 2. Extension
 
