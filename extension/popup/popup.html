@@ -66,6 +66,14 @@
           <button id="dl" type="button" class="primary">Download</button>
         </div>
         <label class="saveas-row">
+          <input type="checkbox" id="autosave-check"/>
+          <span>Auto-save directly to a folder</span>
+        </label>
+        <div id="autosave-options" class="autosave-options hidden">
+          <input id="save-dir" type="text" spellcheck="false" placeholder="Full folder path, e.g. /home/name/Videos" aria-label="Auto-save folder path"/>
+          <small>Enter the full path. The folder will be created if needed.</small>
+        </div>
+        <label class="saveas-row" id="saveas-row">
           <input type="checkbox" id="saveas-check" checked/>
           <span>Prompt where to save file when done</span>
         </label>

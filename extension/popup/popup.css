@@ -320,6 +320,25 @@ button.ghost:hover {
 }
 .saveas-row:hover { color: var(--text); }
 
+.autosave-options { margin: 8px 0 4px; }
+.autosave-options input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+}
+.autosave-options small {
+  display: block;
+  margin: 5px 2px 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
 .warn {
   margin-top: 10px;
   padding: 8px 12px;

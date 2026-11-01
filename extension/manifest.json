@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "youDl",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Local, no-cloud YouTube downloader for your own use. Talks to a yt-dlp helper running on your machine.",
   "permissions": ["activeTab", "tabs", "storage", "downloads", "alarms", "scripting", "nativeMessaging"],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu3Ura0TXqhr3WPEGe/pCCuL2HxxOO8pOlzXTVNQXmtvyRYtPLKU4s58F+GojBITG8ihX9DfCi2ae0bIoIlN0JTRRDqEFWpMViFne/irPj3d+DN9bFtumWIphA8zmOCx/ew8mXOe1l5H23J+a2m4twWNDGfj685cwraXTtzYmoagvZ1AiR+FR6gjAhaDdK5osQj0Uuz0v+Sa+jirsTy1F96pSfffMgTfHO7CKV4/TOIK9moeetgZPFqwl+ueAuLn5UY/OMyYtzRSHRhVgCrDKRBkUOwmE/NsGVXxk1JFa/wK+NjdqXrWNAKOAgGhYtGpycAB8BbzDJvogZt+QNS4kaQIDAQAB",

@@ -37,12 +37,13 @@ Reload the extension after registering the host. If using an unpacked Chromium e
 - On YouTube watch, Shorts, and supported thumbnail pages, use the youDl download control.
 - Or paste a video URL into the extension popup.
 - Choose a quality and format, then download. Progress and cancellation are available in the popup.
+- In the popup, enable **Auto-save directly to a folder** and enter its full path to skip the browser Save As prompt. The folder is created if needed; turn this off to keep using the browser's save prompt.
 
 Other site support depends on `yt-dlp` and each site's availability. Only save videos you have permission to download.
 
 ## How the connection works
 
-The browser launches `native-host/host.js` through Native Messaging. The host uses the local modules in `server/src/` to run `yt-dlp` and report progress over the browser's private standard-input/output channel. It does not expose an HTTP listener or require a server process to be started manually. Download jobs and history are held in memory and are cleared when the host exits.
+The browser launches `native-host/host.js` through Native Messaging. The host uses the local modules in `server/src/` to run `yt-dlp` and report progress over the browser's private standard-input/output channel. It briefly exposes a local-only file endpoint for browser Save As downloads; auto-save mode writes directly to the configured folder. No server process needs to be started manually. Download jobs and history are held in memory and are cleared when the host exits.
 
 ## Project layout
 
