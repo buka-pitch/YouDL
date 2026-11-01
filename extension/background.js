@@ -117,7 +117,7 @@ async function pollOnce() {
         j.snapshot = data;
         if (['done', 'error', 'canceled'].includes(data.status)) {
           j.terminalSince = Date.now();
-          if (data.status === 'done' && !j.browserDownloaded) {
+          if (data.status === 'done' && !j.browserDownloaded && !j.directSave) {
             triggerBrowserDownload(j, data);
           }
         }
@@ -219,7 +219,7 @@ function ensureNativePort() {
             if (['done', 'error', 'canceled'].includes(j.status)) {
               if (!registry[j.jobId].terminalSince) {
                 registry[j.jobId].terminalSince = Date.now();
-                if (j.status === 'done' && !registry[j.jobId].browserDownloaded) {
+                if (j.status === 'done' && !registry[j.jobId].browserDownloaded && !registry[j.jobId].directSave) {
                   triggerBrowserDownload(registry[j.jobId], j);
                 }
               }
@@ -363,16 +363,31 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // register it in the registry so state survives navigation and UI reloads.
   if (msg && msg.type === 'YDL_API') {
     hydrate()
-      .then(() => helperFetch(msg.path, { method: msg.method || 'GET', body: msg.body || null }))
-      .then((data) => {
+      .then(async () => {
+        const method = msg.method || 'GET';
+        let body = msg.body || null;
+        let directSave = false;
+        if (msg.path === '/jobs' && method === 'POST') {
+          const prefs = await api.storage.local.get(['ydlAutoSave', 'ydlSaveDir']).catch(() => ({}));
+          if (prefs.ydlAutoSave) {
+            const output = String(prefs.ydlSaveDir || '').trim();
+            if (!output) throw new Error('Enter an auto-save folder path in the popup settings.');
+            body = { ...(body || {}), output };
+            directSave = true;
+          }
+        }
+        return { data: await helperFetch(msg.path, { method, body }), directSave, body };
+      })
+      .then(({ data, directSave, body }) => {
         let out = data;
         if (msg.path.startsWith('/jobs') && (msg.method || 'GET') === 'POST' && data && data.jobId) {
           registry[data.jobId] = {
             jobId: data.jobId,
-            videoId: extractVideoId(msg.body && msg.body.url),
-            title: (msg.body && msg.body.title) || (data && data.title) || null,
-            preset: (msg.body && msg.body.preset) || data.preset || 'best',
-            format: (msg.body && msg.body.format) || data.format || 'mp4',
+            videoId: extractVideoId(body && body.url),
+            title: (body && body.title) || (data && data.title) || null,
+            preset: (body && body.preset) || data.preset || 'best',
+            format: (body && body.format) || data.format || 'mp4',
+            directSave,
             snapshot: data,
             terminalSince: null,
             createdAt: data.createdAt || Date.now(),

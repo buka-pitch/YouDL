@@ -121,11 +121,14 @@ function updateEstSize() {
     return;
   }
 
-  // Restore saveAs preference
-  chrome.storage.local.get('ydlSaveAs', (res) => {
+  // Restore save destination preferences
+  chrome.storage.local.get(['ydlSaveAs', 'ydlAutoSave', 'ydlSaveDir'], (res) => {
     if (res && res.ydlSaveAs !== undefined) {
       $('saveas-check').checked = !!res.ydlSaveAs;
     }
+    $('autosave-check').checked = !!(res && res.ydlAutoSave);
+    $('save-dir').value = (res && res.ydlSaveDir) || '';
+    updateSaveDestinationControls();
   });
 
   await loadTabVideo();
@@ -376,6 +379,21 @@ async function cancelJob(jobId) {
 
 $('saveas-check').addEventListener('change', () => {
   chrome.storage.local.set({ ydlSaveAs: $('saveas-check').checked });
+});
+
+function updateSaveDestinationControls() {
+  const autoSave = $('autosave-check').checked;
+  show($('autosave-options'), autoSave);
+  show($('saveas-row'), !autoSave);
+}
+
+$('autosave-check').addEventListener('change', () => {
+  chrome.storage.local.set({ ydlAutoSave: $('autosave-check').checked });
+  updateSaveDestinationControls();
+});
+
+$('save-dir').addEventListener('change', () => {
+  chrome.storage.local.set({ ydlSaveDir: $('save-dir').value.trim() });
 });
 
 $('format').addEventListener('change', () => {

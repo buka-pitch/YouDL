@@ -22,6 +22,6 @@ If you use an unpacked Chromium extension with a different extension ID, pass th
 
 ## Use it
 
-On a YouTube watch or Shorts page, use the youDl control. You can also paste a video URL in the popup. Choose a quality and format, then download. Other site support depends on yt-dlp and each site's availability.
+On a YouTube watch or Shorts page, use the youDl control. You can also paste a video URL in the popup. Choose a quality and format, then download. To skip the browser Save As prompt, enable **Auto-save directly to a folder** in the popup and enter the full path; youDl creates the folder if needed. Other site support depends on yt-dlp and each site's availability.
 
 This is an unpacked personal-use tool and is not listed in the Chrome Web Store or Firefox Add-ons marketplace. Only save videos you have permission to download.

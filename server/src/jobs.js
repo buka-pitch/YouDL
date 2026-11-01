@@ -21,6 +21,9 @@ let nextId = Math.floor(Date.now() / 1000);
  * Browser download manager saves the final copy to user's chosen folder.
  */
 function outputDir(requested) {
+  if (requested && !path.isAbsolute(requested)) {
+    throw new Error('The save folder must be an absolute path.');
+  }
   const dir = requested ||
     process.env.YOUDL_OUTPUT ||
     path.join(os.tmpdir(), 'youDl');
