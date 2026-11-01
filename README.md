@@ -6,6 +6,8 @@ youDl is a personal-use browser extension that runs `yt-dlp` on your computer. T
 Browser extension ⇄ Native Messaging ⇄ Local youDl host → yt-dlp → your files
 ```
 
+![youDl extension popup shown over a YouTube page](scrollcraft/builds/youdl/assets/youDl-popup.webp)
+
 ## Install
 
 ### Requirements
