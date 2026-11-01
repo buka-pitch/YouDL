@@ -48,8 +48,14 @@ process.stdin.on('data', (chunk) => {
 });
 
 process.stdin.on('end', () => {
-  console.error('[youDl:native] stdin EOF — host exiting');
-  process.exit(0);
+  console.error('[youDl:native] stdin EOF — keeping file endpoint available for pending browser saves');
+  // The browser can disconnect its native messaging port while a Save As
+  // dialog or the subsequent HTTP transfer is still in progress. Keep the
+  // endpoint accepting requests briefly, then close gracefully so active
+  // streams finish instead of being cut off by process.exit().
+  setTimeout(() => {
+    fileServer.close(() => process.exit(0));
+  }, 120000);
 });
 
 process.on('SIGINT', () => process.exit(0));
@@ -102,9 +108,34 @@ const fileServer = http.createServer((req, res) => {
     res.writeHead(404).end('Completed file not found');
     return;
   }
+  const stat = fs.statSync(job.filepath);
+  const range = req.headers.range && req.headers.range.match(/^bytes=(\d*)-(\d*)$/);
+  if (range) {
+    const start = range[1]
+      ? Number(range[1])
+      : Math.max(0, stat.size - Number(range[2]));
+    const end = range[1] && range[2]
+      ? Math.min(Number(range[2]), stat.size - 1)
+      : stat.size - 1;
+    if ((!range[1] && !range[2]) || start >= stat.size || end < start) {
+      res.writeHead(416, { 'Content-Range': `bytes */${stat.size}` }).end();
+      return;
+    }
+    res.writeHead(206, {
+      'Content-Type': 'application/octet-stream',
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(path.basename(job.filepath))}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': end - start + 1,
+      'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+    });
+    fs.createReadStream(job.filepath, { start, end }).pipe(res);
+    return;
+  }
   res.writeHead(200, {
     'Content-Type': 'application/octet-stream',
     'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(path.basename(job.filepath))}`,
+    'Accept-Ranges': 'bytes',
+    'Content-Length': stat.size,
   });
   fs.createReadStream(job.filepath).pipe(res);
 });
