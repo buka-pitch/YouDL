@@ -23,7 +23,7 @@ let nextId = Math.floor(Date.now() / 1000);
 function outputDir(requested) {
   const dir = requested ||
     process.env.YOUDL_OUTPUT ||
-    path.join(os.homedir(), 'Downloads', 'youDl');
+    path.join(os.tmpdir(), 'youDl');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
@@ -160,6 +160,18 @@ function get(id) {
   return jobs.get(id) ? snapshot(jobs.get(id)) : null;
 }
 
+function removeCompletedFile(id) {
+  const job = jobs.get(Number(id));
+  if (!job || job.status !== 'done' || !job.filepath) return false;
+  try {
+    fs.unlinkSync(job.filepath);
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+  }
+  job.filepath = null;
+  return true;
+}
+
 function cancel(id) {
   const job = jobs.get(id);
   if (!job) return null;
@@ -183,4 +195,4 @@ function list() {
     .map(snapshot);
 }
 
-module.exports = { create, get, cancel, list };
+module.exports = { create, get, cancel, list, removeCompletedFile };

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Local, no-cloud YouTube downloader for your own use. Talks to a yt-dlp helper running on your machine.",
   "permissions": ["activeTab", "tabs", "storage", "downloads", "alarms", "scripting", "nativeMessaging"],
-  "host_permissions": ["http://127.0.0.1:8765/*"],
+  "host_permissions": ["http://127.0.0.1:8765/*", "http://127.0.0.1:8766/*"],
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {

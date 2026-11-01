@@ -18,6 +18,48 @@ const api = typeof browser !== 'undefined' ? browser : chrome;
 const action = api.action || api.browserAction;
 
 const API_BASE = 'http://127.0.0.1:8765';
+const nativeDownloadJobs = new Map();
+const nativeDownloadStorageKey = 'ydlNativeDownloadJobs';
+
+if (api.downloads && api.downloads.onChanged) {
+  api.downloads.onChanged.addListener((delta) => {
+    if (!delta || !delta.id || !delta.state || delta.state.current !== 'complete') return;
+    const jobId = nativeDownloadJobs.get(delta.id);
+    if (jobId) {
+      nativeDownloadJobs.delete(delta.id);
+      removePersistedDownloadJob(delta.id);
+      finishNativeDownload(jobId);
+      return;
+    }
+    api.storage.local.get(nativeDownloadStorageKey).then((stored) => {
+      const jobs = stored[nativeDownloadStorageKey] || {};
+      const persistedJobId = jobs[delta.id];
+      if (!persistedJobId) return;
+      delete jobs[delta.id];
+      api.storage.local.set({ [nativeDownloadStorageKey]: jobs });
+      finishNativeDownload(persistedJobId);
+    }).catch(() => {});
+  });
+}
+
+function removePersistedDownloadJob(downloadId) {
+  api.storage.local.get(nativeDownloadStorageKey).then((stored) => {
+    const jobs = stored[nativeDownloadStorageKey] || {};
+    delete jobs[downloadId];
+    return api.storage.local.set({ [nativeDownloadStorageKey]: jobs });
+  }).catch(() => {});
+}
+
+function finishNativeDownload(jobId) {
+  sendNative({ action: 'removeCompletedFile', jobId })
+    .then((result) => {
+      if (result && result.ok && registry[jobId]) {
+        registry[jobId].snapshot.filepath = null;
+        saveRegistry();
+      }
+    })
+    .catch((err) => console.warn('[youDl] Could not remove temporary native copy:', err));
+}
 
 /* ── job registry (persisted; survives worker recycling) ─────────────── */
 
@@ -101,14 +143,10 @@ async function triggerBrowserDownload(j, data) {
   j.browserDownloaded = true;
   saveRegistry();
 
-  // When running via native host, the file is saved directly to disk (e.g. ~/Downloads/youDl/)
-  if (nativePort) {
-    console.info('[youDl] Native download completed on disk:', data.filepath);
-    return;
-  }
-
   if (!api.downloads || !api.downloads.download) return;
-  const url = `${API_BASE}/jobs/${j.jobId}/file`;
+  const url = nativePort
+    ? `http://127.0.0.1:8766/jobs/${j.jobId}/file`
+    : `${API_BASE}/jobs/${j.jobId}/file`;
   let filename = undefined;
   if (data.filepath) {
     const parts = data.filepath.split(/[/\\]/);
@@ -127,6 +165,13 @@ async function triggerBrowserDownload(j, data) {
     }, (id) => {
       if (api.runtime.lastError) {
         console.warn('[youDl] download manager notice:', api.runtime.lastError.message);
+      } else if (nativePort && typeof id === 'number') {
+        nativeDownloadJobs.set(id, j.jobId);
+        api.storage.local.get(nativeDownloadStorageKey).then((stored) => {
+          const jobs = stored[nativeDownloadStorageKey] || {};
+          jobs[id] = j.jobId;
+          return api.storage.local.set({ [nativeDownloadStorageKey]: jobs });
+        }).catch(() => {});
       }
     });
   } catch (err) {
@@ -174,6 +219,9 @@ function ensureNativePort() {
             if (['done', 'error', 'canceled'].includes(j.status)) {
               if (!registry[j.jobId].terminalSince) {
                 registry[j.jobId].terminalSince = Date.now();
+                if (j.status === 'done' && !registry[j.jobId].browserDownloaded) {
+                  triggerBrowserDownload(registry[j.jobId], j);
+                }
               }
             }
             changed = true;

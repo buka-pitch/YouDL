@@ -13,6 +13,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 
 // Redirect stdout-based console calls to stderr so stdout is strictly preserved for binary JSON frames
 console.log = (...args) => console.error('[youDl:native]', ...args);
@@ -76,16 +77,39 @@ function ensureJobBroadcasting() {
     const all = jobs.list();
     const active = all.filter((j) => ['queued', 'downloading', 'postprocessing'].includes(j.status));
 
+    // Send the terminal snapshot before stopping so the extension can notify
+    // the browser download manager and open its normal save prompt.
+    sendMsg({ event: 'jobsUpdate', jobs: all });
     if (active.length === 0) {
       clearInterval(broadcastTimer);
       broadcastTimer = null;
       return;
     }
-
-    // Broadcast current snapshots to the extension
-    sendMsg({ event: 'jobsUpdate', jobs: all });
   }, 600);
 }
+
+// Expose completed files to the browser's download manager. The browser
+// handles the normal Save As prompt while the native host remains the owner
+// of the download job and file path.
+const fileServer = http.createServer((req, res) => {
+  const match = req.url && req.url.match(/^\/jobs\/(\d+)\/file$/);
+  if (req.method !== 'GET' || !match) {
+    res.writeHead(404).end('Not found');
+    return;
+  }
+  const job = jobs.get(Number(match[1]));
+  if (!job || job.status !== 'done' || !job.filepath || !fs.existsSync(job.filepath)) {
+    res.writeHead(404).end('Completed file not found');
+    return;
+  }
+  res.writeHead(200, {
+    'Content-Type': 'application/octet-stream',
+    'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(path.basename(job.filepath))}`,
+  });
+  fs.createReadStream(job.filepath).pipe(res);
+});
+fileServer.on('error', (err) => console.error('[youDl:native] File server error:', err.message));
+fileServer.listen(8766, '127.0.0.1');
 
 /* ── message dispatcher ───────────────────────────────────────────────── */
 
@@ -153,6 +177,12 @@ async function handleMessage(msg) {
       } else {
         sendMsg({ id, ok: true, data: res });
       }
+      return;
+    }
+
+    if (msg.action === 'removeCompletedFile') {
+      const removed = jobs.removeCompletedFile(Number(msg.jobId || body.jobId));
+      sendMsg({ id, ok: true, data: { removed } });
       return;
     }
 

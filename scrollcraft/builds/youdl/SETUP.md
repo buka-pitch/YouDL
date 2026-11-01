@@ -1,6 +1,6 @@
 # youDl personal-use bundle
 
-youDl runs `yt-dlp` on your computer. The browser connects to the local Native Messaging Host, which the browser starts when needed. No server needs to be kept running and no localhost port is opened.
+youDl runs `yt-dlp` on your computer. The browser connects to the local Native Messaging Host, which the browser starts when needed. The host briefly opens a local-only file transfer port so the browser can save completed downloads to your chosen location.
 
 ## Requirements
 
